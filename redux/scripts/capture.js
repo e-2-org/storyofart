@@ -15,6 +15,11 @@
  * Times are seconds, or like 2h15m30s. --frames gives a range of frames
  * (start inclusive, end exclusive) on the piece's frame grid at --fps, which
  * render-sections.js uses so that sections join exactly.
+ * --vf applies an ffmpeg filter to the video; --also writes a second video from the same frames,
+ * with its own filter (--also-vf). E.g. 4K in both shapes from one render:
+ *   --width 4096 --aspect 16:9 --vf scale=3840:2160:flags=lanczos
+ *   --also out-dci.mp4 --also-vf crop=4096:2160:0:72
+ * --threads limits each x264 encoder's threads, which also limits its memory (at 4K the default can use several GB).
  * --aspect 5:3 crops the top and bottom of the 4:3 composition, as the
  * projection was masked at the Tate (default 4:3).
  */
@@ -67,7 +72,7 @@ function serve() {
     const browser = await puppeteer.launch({ executablePath: CHROME, headless: true, args: ['--hide-scrollbars'] });
     const page = await browser.newPage();
     await page.setViewport({ width, height });
-    await page.goto(`http://127.0.0.1:${server.address().port}/index.html?capture&aspect=${opts.aspect}`);
+    await page.goto(`http://127.0.0.1:${server.address().port}/player.html?capture&aspect=${opts.aspect}`);
     await page.evaluate(() => window.playerReady);
     await page.evaluate(() => document.fonts.ready);
     const render = t => page.evaluate(t => window.player.renderAt(t), t);
@@ -89,11 +94,20 @@ function serve() {
             [first, last] = opts.frames.split(':').map(Number);
         }
         const frames = last - first;
+        /* one output, or two from the same frames (--also), each with an optional filter (--vf, --also-vf) */
+        const outputs = [{ file: opts.out, vf: opts.vf }];
+        if (opts.also) outputs.push({ file: opts.also, vf: opts['also-vf'] });
+        const encode = ['-c:v', 'libx264', '-preset', 'slow', '-crf', opts.crf, '-pix_fmt', 'yuv420p', '-movflags', '+faststart',
+            ...(opts.threads ? ['-threads', opts.threads] : [])];
+        const filters = outputs.length > 1
+            ? ['-filter_complex', `[0]split=${outputs.length}${outputs.map((_, i) => `[s${i}]`).join('')};`
+                + outputs.map((o, i) => `[s${i}]${o.vf || 'null'}[o${i}]`).join(';')]
+            : (opts.vf ? ['-vf', opts.vf] : []);
         const ffmpeg = spawn('ffmpeg', [
             '-y', '-loglevel', 'error',
             '-f', 'image2pipe', '-framerate', String(fps), '-c:v', 'png', '-i', '-',
-            '-c:v', 'libx264', '-preset', 'slow', '-crf', opts.crf, '-pix_fmt', 'yuv420p', '-movflags', '+faststart',
-            path.resolve(ROOT, opts.out),
+            ...filters,
+            ...outputs.flatMap((o, i) => [...(outputs.length > 1 ? ['-map', `[o${i}]`] : []), ...encode, path.resolve(ROOT, o.file)]),
         ], { stdio: ['pipe', 'inherit', 'inherit'] });
         const started = Date.now();
         for (let i = 0; i < frames; i++) {

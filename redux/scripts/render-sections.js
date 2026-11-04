@@ -110,6 +110,8 @@ if (opts.list) {
 }
 
 fs.mkdirSync(outDir, { recursive: true });
+const alsoDir = opts.also && path.resolve(ROOT, opts.also);
+if (alsoDir) fs.mkdirSync(alsoDir, { recursive: true });
 
 if (opts.posters) {
     /* one capture process renders all the stills, which are then renamed to match the videos */
@@ -134,7 +136,7 @@ if (opts.posters) {
 }
 
 const passthrough = Object.entries(opts)
-    .filter(([key]) => !['jobs', 'fps', 'width', 'aspect', 'out', 'only', 'posters', 'poster-scale'].includes(key))
+    .filter(([key]) => !['jobs', 'fps', 'width', 'aspect', 'out', 'only', 'posters', 'poster-scale', 'also'].includes(key))
     .flatMap(([key, value]) => ['--' + key, value]);
 const todo = sections.filter(s => selected(s.n) && !fs.existsSync(path.join(outDir, s.file)));
 const totalFrames = todo.reduce((n, s) => n + s.frames[1] - s.frames[0], 0);
@@ -143,6 +145,8 @@ console.log(`${todo.length} sections to render (${totalFrames} frames) with ${op
 function render(section) {
     return new Promise((resolve, reject) => {
         const partial = path.join(outDir, section.file.replace(/\.mp4$/, '.partial.mp4'));
+        /* --also DIR: a second video of each section from the same frames (see capture.js) */
+        const alsoPartial = alsoDir && path.join(alsoDir, section.file.replace(/\.mp4$/, '.partial.mp4'));
         const child = spawn(process.execPath, [
             path.join(__dirname, 'capture.js'),
             '--frames', section.frames.join(':'),
@@ -150,6 +154,7 @@ function render(section) {
             '--width', opts.width,
             '--aspect', opts.aspect,
             '--out', path.relative(ROOT, partial),
+            ...(alsoPartial ? ['--also', path.relative(ROOT, alsoPartial)] : []),
             ...passthrough,
         ], { cwd: ROOT, stdio: ['ignore', 'ignore', 'pipe'] });
         let errors = '';
@@ -161,6 +166,7 @@ function render(section) {
                 return;
             }
             fs.renameSync(partial, path.join(outDir, section.file));
+            if (alsoPartial) fs.renameSync(alsoPartial, path.join(alsoDir, section.file));
             console.log(`done ${section.file} (${formatTime(section.end - section.start)} in ${formatTime(Date.now() - started)})`);
             resolve();
         });
