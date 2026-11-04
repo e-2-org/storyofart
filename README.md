@@ -20,3 +20,15 @@ In February 2004, Dean Jackson was on his first visit to London. Naturally he to
 As Dean said afterwards, "I was really surprised and impressed to find out later that it *had* been done in SVG". It was a nice welcome to London for Dean and a great compliment for e-2, who made the piece with Emma.
 
 _The Story of Art_ was shown in Tate Gallery, London and then  at the PowerPlant gallery at the Harbourfront Centre in Toronto.
+
+Layout
+------
+
+The original files are at the top of this repository, unchanged: the Tate version (`tate version/`), the earlier files, the generator, the text and the Toronto samples. `report/` holds a 2004 report listing the files with their length and running times (`report.doc`) and a page about the project (`TheStoryOfArt.html`). This folder was called `docs/` until 2026.
+
+The redevelopment for modern browsers, from 2026, is in two parts:
+
+* `docs/` is the site, published by GitHub Pages from the `main` branch at [e-2-org.github.io/storyofart](https://e-2-org.github.io/storyofart/): the browser version (`player.html`) and a page introducing the work, with videos of the whole piece and each of its sections;
+* `redux/` holds the tools that make it, and render it to video (see `redux/README.md`).
+
+Summaries and transcripts of the Claude Code sessions are in `_sessions/`.

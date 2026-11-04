@@ -1,6 +1,6 @@
 # The Story of Art redevelopment - session transcript
 
-Transcript of a Claude Code session (2026-10-02 16:22 UTC to 2026-10-04 10:48 UTC). Tool calls are shown as one-line notes; their output is omitted.
+Transcript of Claude Code sessions: 2026-10-02 16:22 UTC to 2026-10-04 10:48 UTC, and the Story of Art parts of 2026-11-03 to 2026-11-04 (the 4K versions). Tool calls are shown as one-line notes; their output is omitted.
 
 ---
 
@@ -754,3 +754,132 @@ It's committed as `ce20d52` on `develop`. The commit includes the index page, `.
 Before the site goes live:
 1. **Upload the media to `media.bjorsq.net/soa/`:** `story-of-art.mp4` from `redux/output/`, plus the 72 section `.mp4` files and 72 `.png` posters from `redux/output/sections/`.
 2. **Point Pages at the code:** merge `develop` into the branch GitHub Pages publishes from, and set Pages to publish that branch's root folder.
+
+---
+
+# 4K versions: 3 and 4 November 2026
+
+These sessions mostly worked on other e-2 projects. Only the parts about The Story of Art are given here, with the rest summarised in square brackets.
+
+## 2026-11-03 11:54 UTC
+
+[While working on links and "how it was made" pages for The Story of Art and The Future from Memory on the e-2 website, Claude set up 4K versions of both pieces, for Emma Kay, in case she wants them for a large-scale projection.]
+
+## Claude
+
+Before the site work, I'll set up the 4K renders, since they'll take hours and can run in the background. Checking the tools and disk space.
+
+> *Bash: Check disk space and CPU threads*
+
+> *Bash: Measure every box at its resting position in the player*
+
+> *Bash: Test a 4K frame*
+
+Sharp at 4K. Starting the full Story of Art render in the background: 5 parallel jobs at reduced priority, with UHD and DCI sections written to separate folders.
+
+---
+
+## User - 2026-11-03 13:18 UTC
+
+It looks like my computer crashed - maybe when you were rendering out the video?
+
+## Claude
+
+> *Bash: Check the previous session's log and the system journal*
+
+Yes, it was the render. The machine didn't reboot, but it ran out of memory and thrashed for about 35 minutes, which would have made it look crashed.
+
+**What happened**
+- **12:08:** the previous session started the full 4K Story of Art render with 5 parallel jobs. Each job ran headless Chrome at 4096 wide and fed **two** ffmpeg encoders (x264, preset slow, one for UHD and one for DCI). That's 5 Chromes and 10 4K encoders on a 31 GB machine. One ffmpeg alone was holding about 6 GB.
+- **12:09:** it also ran a 4K Ruffle test for The Future from Memory on top of that.
+- **12:11 to 12:47:** the kernel's out-of-memory killer fired repeatedly. It killed processes in your desktop session and in VS Code, journald crashed, and swap filled. The render processes eventually died too.
+
+Nothing from the render survived. Before re-running it, I'd suggest fewer jobs, a memory cap (`systemd-run --user -p MemoryMax=20G`), and possibly less work per job.
+
+---
+
+## User - 2026-11-03 13:29 UTC
+
+OK - it's just the complete piece I need for these two enders (I don't need the sections). I'm moving my home directory to another disk so I have a bit more space to play with - leave the render until this evening.
+
+## Claude
+
+OK, I won't touch the renders until this evening: only the complete piece for each, fewer jobs, and a memory cap so a runaway render can't take down the desktop again.
+
+---
+
+## User - 2026-11-03 15:55 UTC
+
+I've cleared some space and mounted some SSD storage at /mnt/scratch to use for the renders - you can continue with them
+
+## Claude
+
+> *Bash: Check the new storage*
+
+> *Bash: Measure one job's peak memory and speed on 600 frames*
+
+> *Edit: capture.js: add a --threads option*
+
+> *Write: /mnt/scratch/4k/run-4k.sh*
+
+> *Bash: Start the render under a 20 GB memory cap*
+
+The 4K renders are running again on the SSD. This time they're capped at 20 GB of RAM, and swap is off for the render, so if it runs out of memory only the render is killed, not your desktop.
+
+- **Memory per job:** I measured one Story of Art job at 7.4 GB, mostly ffmpeg. I added a `--threads` option to `scripts/capture.js`, which brings each job down to about 6 GB and holds steady over a long run.
+- **Fewer jobs:** Story of Art now runs 3 jobs instead of 5, about 18 GB in total.
+- **One piece at a time:** The Future from Memory renders first, then Story of Art.
+- **Restartable:** each step is skipped if its output already exists.
+- Story of Art crops to DCI (72 pixels from the top and bottom of a 4096×2304 render), because its text stays well clear of the top and bottom. UHD is the same render scaled down.
+
+[Work on other projects followed.]
+
+---
+
+## Claude - 2026-11-03 18:12 UTC
+
+> *Bash: Check the render service*
+
+The render service failed at 18:10, after finishing The Future from Memory: Story of Art failed at once because `node` comes from nvm and isn't on the systemd service's `PATH`.
+
+> *Edit: run-4k.sh: add node to PATH*
+
+> *Bash: Restart the render service*
+
+It's now rendering: 72 sections (1,026,433 frames) with 3 jobs.
+
+---
+
+## User - 2026-11-03 22:19 UTC
+
+Any idea what kind of size they will be
+
+## Claude
+
+> *Bash: Check finished section sizes and free space*
+
+My estimate is roughly **7–9 GB for the UHD file** and **6–8 GB for the DCI**. The two sections finished so far come to about 1.7 Mbit/s for UHD and 1.5 Mbit/s for DCI, which over 9½ hours gives about 7.3 GB and 6.4 GB. The later sections are faster and have more text on screen, so they may take more space. The SSD has 92 GB free, so there's plenty of room.
+
+---
+
+## User - 2026-11-04 (after 15:48 UTC)
+
+They look great - thanks!
+
+## Claude
+
+> *Bash: Confirm the render finished*
+
+The Story of Art render finished at 15:48. It came out at 7.9 GB for UHD and 7.6 GB for DCI. The render reached the 20 GB cap at some point but wasn't stopped; if you render at 4K again, use 2 jobs rather than 3 to leave more headroom.
+
+---
+
+## User - 2026-11-04 21:30 UTC
+
+I didn't realise I'd deleted sessions... are the transcript and summary there? If not, can you recreate them, and update them. Please delete the sections and commit the changes to the story of art repo when you finished with the _sessions folder
+
+## Claude
+
+> *Bash: Compare old and new session files*
+
+The summary and transcript weren't lost: they had been moved from `sessions/` to `_sessions/`, renamed `summary.md` and `transcript.md`, with the summary's link to the transcript updated. I've added the 4K versions to both, deleted the section files from `/mnt/scratch/4k/`, and committed the script changes and the session files on `develop`.

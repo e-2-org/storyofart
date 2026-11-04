@@ -3,12 +3,14 @@ The Story of Art - redux
 
 A redevelopment of _The Story of Art_ (Emma Kay, with e-2) for modern browsers, and for rendering to video.
 
+This folder holds the tools: the scripts, and the videos they render (`output/`, not in the repository). The site they make is in `../docs/`: the browser version (`player.html`, `player.js` and `timeline.json`) and the page that introduces the work and lists the videos (`index.html`, written by `scripts/build-site.js`).
+
 The original ran in the Adobe SVG Viewer 3. It no longer runs in modern browsers: the files use an undeclared `xlink` namespace (so they don't parse), the layout script reads invalid CSS from `style` attributes (which browsers now discard), and the text was set in an embedded SVG font (only Safari supports these).
 
 How it works
 ------------
 
-`scripts/extract-timeline.js` reads the Tate version (`../tate version/soa1.svg` to `soa8.svg`, in the order they were played at the Tate) and writes `timeline.json`: the text, font size and line spacing of each of the 5,812 text boxes, and the durations and easing of its animation. The piece runs for 9h 30m.
+`scripts/extract-timeline.js` reads the Tate version (`../tate version/soa1.svg` to `soa8.svg`, in the order they were played at the Tate) and writes `../docs/timeline.json`: the text, font size and line spacing of each of the 5,812 text boxes, and the durations and easing of its animation. The piece runs for 9h 30m.
 
 `player.js` renders any moment of the piece from the timeline. Only one text box is in the document at a time, so it can run indefinitely without using more memory. The text layout is a port of `TextSpline` from `soa_multiples.es`, and the motion reproduces the SMIL animation:
 
@@ -19,12 +21,12 @@ each eased with the original `keySplines`.
 
 ```
 npm install
-npm run timeline      # regenerate timeline.json
+npm run timeline      # regenerate ../docs/timeline.json
 ```
 
 ### Playing in a browser
 
-Serve this folder (e.g. `npx http-server .`) and open `index.html`.
+The player is in `../docs/`, the site GitHub Pages publishes. Serve that folder (e.g. `npx http-server ../docs`) and open `player.html`.
 
 * `?t=2h15m` starts at that point (or plain seconds)
 * `?debug` shows the time
