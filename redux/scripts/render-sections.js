@@ -29,7 +29,7 @@ const path = require('path');
 const { spawn } = require('child_process');
 
 const ROOT = path.resolve(__dirname, '..');
-const timeline = require(path.join(ROOT, 'timeline.json'));
+const timeline = require(path.resolve(ROOT, '../docs/timeline.json'));
 
 const opts = { jobs: String(Math.max(1, Math.floor(os.cpus().length / 3))), fps: '30', width: '1440', aspect: '4:3', out: 'output/sections' };
 const argv = process.argv.slice(2);

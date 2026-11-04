@@ -133,6 +133,15 @@ Both are H.264 (CRF 18), 30 frames a second, 1,026,433 frames, 9h 30m 14s, the s
 - The first attempt ran 5 jobs with no memory limit. At 4K each x264 encoder used several GB, and the machine ran out of memory and crashed. With `--threads 3` each job uses about 6 GB, and 3 jobs fit inside the 20 GB cap. The service's memory peak was 20 GB, so 2 jobs would leave more headroom next time.
 - The first run under systemd failed at once, because `node` comes from nvm and wasn't on the service's `PATH`. The script now adds it.
 
+## Repository layout (November 2026)
+
+The repository moved to the `e-2-org` organisation, and was reorganised to match the other e-2 repositories, where GitHub Pages publishes `docs/` on `main` with no Actions workflow:
+
+- The site moved from `redux/` to `docs/`: `index.html`, `player.html`, `player.js`, `timeline.json`, `robots.txt` and `.nojekyll`. Its addresses on `e-2-org.github.io/storyofart/` stay the same.
+- The original `docs/` folder (a 2004 report and a page about the project) became `report/`.
+- `redux/` keeps the tools. The scripts now read and write the site in `docs/`: the capture serves the player from there, the extractor writes `docs/timeline.json`, and `build-site.js` writes `docs/index.html` and links to `player.html`.
+- The Pages workflow (`.github/workflows/static.yml`) was removed.
+
 ## Commits on `develop`
 
 - `5c35fc2` Added redux: timeline extractor, browser player and video capture for the Tate version

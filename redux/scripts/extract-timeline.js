@@ -14,7 +14,7 @@
  * from box to box (they were set per section in the PHP generator), so the
  * timeline records those along with the text and its formatting.
  *
- * Output: redux/timeline.json
+ * Output: docs/timeline.json
  *
  * Usage: node scripts/extract-timeline.js
  */
@@ -22,7 +22,7 @@ const fs = require('fs');
 const path = require('path');
 
 const SRC = path.resolve(__dirname, '../../tate version');
-const OUT = path.resolve(__dirname, '../timeline.json');
+const OUT = path.resolve(__dirname, '../../docs/timeline.json');
 /* soa7 originally looped back to soa1 - it was corrected to soa8 at the Tate */
 const FILES = [1, 2, 3, 4, 5, 6, 7, 8].map(n => `soa${n}.svg`);
 

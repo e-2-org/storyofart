@@ -1,7 +1,7 @@
 /**
- * Builds the GitHub Pages index page (../index.html at the repository root)
+ * Builds the GitHub Pages index page (docs/index.html at the repository root)
  *
- * The page introduces the work, links to the browser version (redux/), and
+ * The page introduces the work, links to the browser version (player.html), and
  * lists the videos - the full piece, then each section - which are served
  * from MEDIA. The figures in the information box and under each video are
  * worked out here from timeline.json and the render outputs (output/), so
@@ -16,16 +16,17 @@ const { execSync } = require('child_process');
 
 const ROOT = path.resolve(__dirname, '..');
 const REPO = path.resolve(ROOT, '..');
-const OUT = path.join(REPO, 'index.html');
+const SITE = path.join(REPO, 'docs');
+const OUT = path.join(SITE, 'index.html');
 const OUTPUT = path.join(ROOT, 'output');
 const SECTIONS = path.join(OUTPUT, 'sections');
-/* where the videos and posters are served from (MEDIA=redux/output/sections/ previews with local posters) */
+/* where the videos and posters are served from (MEDIA=../redux/output/sections/ previews with local posters) */
 const MEDIA = process.env.MEDIA || 'https://media.bjorsq.net/soa/';
 const FULL = 'story-of-art.mp4';
 /* the settings the videos were rendered with (see README) */
 const VIDEO = { width: 1920, height: 1080, fps: 30, aspect: '16:9', codec: 'H.264 (x264, preset slow, CRF 18)' };
 
-const timeline = require(path.join(ROOT, 'timeline.json'));
+const timeline = require(path.join(SITE, 'timeline.json'));
 const boxes = timeline.boxes;
 
 /* ---------- formatting ---------- */
@@ -291,7 +292,7 @@ footer { border-top: 1px solid var(--line); padding: 24px 0 48px; color: var(--m
 <p>It is an animated wall projection. Sentences, wrapped into short justified paragraphs, travel towards the viewer from a point just above the centre of the screen, rest there briefly, then accelerate past, off the bottom of the screen; each section heading leaves by the top. The piece speeds up imperceptibly over ${Math.floor(timeline.duration / 3600000)} and a half hours, from a new paragraph every ${seconds(boxTime(firstBox))} to one every ${seconds(boxTime(lastBox))}, until only the occasional word can be read.</p>
 <p>It was projected 25 feet wide at Tate Modern, London, where it looped continuously for 11 months, and then shown at the Power Plant, Toronto. e-2 made it in SVG, so that the artist&rsquo;s text could be edited up to the last minute and the whole piece regenerated in a single step, and so that the text stayed sharp at that scale.</p>
 <p>The original ran in Adobe&rsquo;s SVG Viewer, a browser plugin which no longer exists. In 2026 it was redeveloped from the original files to run in a modern browser, drawing the letters with the same embedded font, and rendered to video.</p>
-<a class="play" href="redux/">Watch it in your browser</a>
+<a class="play" href="player.html">Watch it in your browser</a>
 <p class="play-note">The browser version plays the whole piece in real time and loops. Space pauses, the arrow keys skip, F goes fullscreen, and the camera button saves a screenshot.</p>
 </div>
 <main>

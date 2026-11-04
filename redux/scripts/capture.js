@@ -30,6 +30,8 @@ const { spawn } = require('child_process');
 const puppeteer = require('puppeteer-core');
 
 const ROOT = path.resolve(__dirname, '..');
+/* the site, which holds the player (docs/ at the repository root, published by GitHub Pages) */
+const SITE = path.resolve(ROOT, '../docs');
 const CHROME = process.env.CHROME_PATH || '/usr/bin/google-chrome';
 
 function parseTime(str) {
@@ -51,8 +53,8 @@ function args() {
 function serve() {
     const types = { '.html': 'text/html', '.js': 'text/javascript', '.json': 'application/json' };
     const server = http.createServer((req, res) => {
-        const file = path.join(ROOT, decodeURIComponent(new URL(req.url, 'http://x').pathname));
-        if (!file.startsWith(ROOT) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) {
+        const file = path.join(SITE, decodeURIComponent(new URL(req.url, 'http://x').pathname));
+        if (!file.startsWith(SITE) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) {
             res.writeHead(404).end();
             return;
         }
